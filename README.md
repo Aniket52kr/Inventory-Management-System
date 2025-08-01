@@ -1,6 +1,6 @@
 # 🏗️ Bynry Inventory Backend API
 
-A B2B inventory management backend system for **StockFlow**, built using **Node.js, Express.js, and MySQL**. This project was developed as part of the **Backend Engineering Intern Case Study** for Bynry Inc.
+A scalable and modular backend system for **StockFlow**, a B2B inventory management platform. Built using **Node.js, Express.js, and MySQL**, this project was developed as part of the **Backend Engineering Intern Case Study** for Bynry Inc.
 
 ---
 
@@ -8,75 +8,84 @@ A B2B inventory management backend system for **StockFlow**, built using **Node.
 
 | Feature                      | Description |
 |------------------------------|-------------|
-| Create companies             | Manage tenants (B2B) |
-| Add warehouses               | Track locations per company |
-| Add products with inventory  | Products tracked by SKU and quantity |
-| Link suppliers to products   | Enables reordering in low-stock alerts |
-| Track inventory logs         | Tracks stock-in/out history |
-| Simulate sales               | Reduces stock and logs sales |
-| Low-stock alerts             | Based on threshold and sales activity |
-| Clean database schema        | Normalized, scalable structure |
+| ✅ Create companies             | Manage B2B clients as separate entities |
+| ✅ Add warehouses               | Track multiple locations under each company |
+| ✅ Add products with inventory  | Products are tracked via unique SKUs and stored per warehouse |
+| ✅ Link suppliers to products   | Maintains supply chain relationships |
+| ✅ Track inventory logs         | Logs every inventory movement (add, sale, etc.) |
+| ✅ Simulate sales               | Records sale activity and updates inventory |
+| ✅ Low-stock alerts             | Alerts based on recent sales and threshold |
+| ✅ Clean, normalized schema     | Designed for performance and scalability |
 
 ---
 
 ## 🧠 Thought Process & Approach
 
 ### 🔍 Part 1: Debugging & Refactoring
-Original Python/Flask product endpoint had multiple critical issues:
-- **No SKU uniqueness validation**
-- **No input validation**
-- **No transaction wrapping**
-- **No inventory logging**
-- **No error handling**
 
-Rebuilt the logic in `Express.js` with:
-- Validation
-- Transactions
-- Unique SKU enforcement
-- Inventory logging
-- Safe fallback and rollback
+The original Python/Flask code had several flaws:
+
+- ❌ No SKU uniqueness validation
+- ❌ No input validation or field checks
+- ❌ No transaction control — caused inconsistent state on failure
+- ❌ No inventory logs
+- ❌ No error handling (try/catch)
+
+### ✅ My Fixes Using Express.js:
+
+- Enforced SKU uniqueness
+- Used transactions (`connection.beginTransaction()`)
+- Added inventory logging on creation and sale
+- Validated inputs strictly before DB insertion
+- Wrapped everything with proper `try/catch` and rollback on error
 
 ---
 
 ### 🧩 Part 2: Database Design
 
-####  Entity Highlights:
-- `companies` → manages multiple `warehouses`
-- `products` have unique SKUs across platform
-- `inventory` per product per warehouse
-- `inventory_logs` for stock movement tracking
-- `suppliers` linked via `product_suppliers`
-- `sales` for tracking historical activity
-- `product_bundles` for bundle support
+#### 🧱 Entity Highlights
 
-####  Indexes & Constraints:
+| Table | Purpose |
+|-------|---------|
+| `companies` | Stores client companies |
+| `warehouses` | Warehouses under each company |
+| `products` | Unique SKU, price, threshold |
+| `inventory` | Quantity per product per warehouse |
+| `inventory_logs` | Logs changes in inventory |
+| `suppliers` | Vendor details |
+| `product_suppliers` | Many-to-many product-supplier map |
+| `product_bundles` | Self-referencing bundles |
+| `sales` | Sales tracking (for alert logic) |
+
+#### 🔐 Indexes & Constraints
+
 - `UNIQUE(product_id, warehouse_id)` in `inventory`
-- `sku` uniqueness in `products`
-- `FOREIGN KEY ON DELETE CASCADE` for cleanup
-- `sales(product_id, sale_date)` indexed for alerts
+- `sku` is unique in `products`
+- Foreign keys ensure relational integrity
+- Indexed sales table for optimized alert queries
 
 ---
 
 ### 📉 Part 3: Low-Stock Alert Endpoint
 
-- Filters only **active products** (with sales in last 30 days)
-- Calculates `days_until_stockout` based on daily sales
-- Includes `supplier` info for reordering
+The `GET /alerts/companies/:company_id/alerts/low-stock` endpoint:
+
+- Returns only products with recent sales (last 30 days)
+- Filters those **below their threshold**
+- Calculates:
+  - `daily_sales = total sales / 30`
+  - `days_until_stockout = current_stock / daily_sales`
+- Includes supplier contact info for fast reordering
 - Handles multiple warehouses per company
 
 ---
 
-## 🗃️ Database Schema
-
-Included in [`schema.sql`](./models/schema.sql)
-
----
 
 ## 📡 API Endpoints
 
 > Base URL: `http://localhost:3000/api`
 
-### 📁 Companies
+### 🏢 Companies
 | Method | Endpoint              | Description |
 |--------|-----------------------|-------------|
 | POST   | `/companies`          | Create a new company |
@@ -84,27 +93,27 @@ Included in [`schema.sql`](./models/schema.sql)
 ### 🏠 Warehouses
 | Method | Endpoint              | Description |
 |--------|-----------------------|-------------|
-| POST   | `/warehouses`         | Create a warehouse for a company |
+| POST   | `/warehouses`         | Add warehouse to a company |
 
 ### 📦 Products
 | Method | Endpoint              | Description |
 |--------|-----------------------|-------------|
-| POST   | `/products`           | Add product + initial inventory |
+| POST   | `/products`           | Add product and initial stock to warehouse |
 
 ### 🧍 Suppliers
 | Method | Endpoint              | Description |
 |--------|-----------------------|-------------|
-| POST   | `/suppliers`          | Add new supplier |
+| POST   | `/suppliers`          | Add a new supplier |
 
-### 🔗 Product-Supplier Mapping
+### 🔗 Product-Supplier Link
 | Method | Endpoint              | Description |
 |--------|-----------------------|-------------|
-| POST   | `/product-suppliers`  | Link product to supplier |
+| POST   | `/product-suppliers`  | Link product to a supplier |
 
 ### 🧾 Sales (Simulated)
 | Method | Endpoint              | Description |
 |--------|-----------------------|-------------|
-| POST   | `/sales`              | Simulate a sale and decrease inventory |
+| POST   | `/sales`              | Record a product sale and update inventory |
 
 ### 🚨 Low Stock Alerts
 | Method | Endpoint                                           | Description |
@@ -113,59 +122,65 @@ Included in [`schema.sql`](./models/schema.sql)
 
 ---
 
-## 🧪 Testing Guide (Postman)
+## 🧪 Testing Instructions (Postman)
 
-1. Start server: `node app.js`
-2. Use Postman to call each route (refer to API table above)
-3. Verify DB inserts and responses
-4. Use `/alerts/...` to verify low-stock logic
+1. Start the server using `node app.js` or `npx nodemon app.js`
+2. Use the Postman collection to test endpoints:
+   - Create a company
+   - Add warehouse
+   - Add product and inventory
+   - Link supplier
+   - Simulate sales
+   - Fetch low-stock alerts
+3. Observe real-time changes in your MySQL DB
 
 ---
 
 ## ⚙️ Tech Stack
 
-- **Node.js**
-- **Express.js**
-- **MySQL 8+**
-- **Postman** for testing
+- **Node.js** — runtime
+- **Express.js** — server framework
+- **MySQL** — relational database
+- **Postman** — API testing tool
 
 ---
 
 ## 📌 Assumptions Made
 
-- "Recent sales activity" = sales in the last 30 days
-- A product can exist in multiple warehouses
-- A product can have one or many suppliers
-- Each sale reduces inventory and logs the change
+- Recent activity = sales in last 30 days
+- Inventory is tracked per warehouse
+- A product can have multiple suppliers, but only one is shown in alerts
+- Bundles are supported but not implemented in logic yet
 
 ---
 
-## 🛡️ Error Handling
+## 🛡️ Error Handling & Best Practices
 
-All endpoints:
-- Validate inputs
-- Return proper HTTP status codes (e.g., 400, 409, 500)
-- Use transactions where multiple DB writes occur
+- Input validation for every endpoint
+- Consistent use of HTTP status codes (e.g. `400`, `409`, `500`)
+- MySQL transactions for multi-step DB operations
+- Rollbacks to prevent partial writes
+- Try/catch and custom error messages
 
 ---
 
-##  How I Solved the Original Code Issues
+## 🛠️ Fixing Original Issues in the Assignment
 
-| Issue in Given Flask Code           | My Solution (Express.js) |
-|-------------------------------------|---------------------------|
-| No SKU uniqueness                   | Added DB + pre-check      |
-| No transactions                     | Wrapped in `beginTransaction()` |
-| No inventory logging                | Added `inventory_logs`    |
-| No input validation                 | Strong validation & error responses |
-| No error handling                   | `try-catch` and rollback |
+| Issue from Flask Code              | My Fix in Express.js |
+|-----------------------------------|-----------------------|
+| No SKU uniqueness                 | Enforced unique check in DB |
+| No rollback if inventory fails    | Wrapped everything in a transaction |
+| No logging of inventory movement  | Created `inventory_logs` table |
+| No input checks                   | Added validation for all fields |
+| No error handling                 | Used `try/catch`, rollback, and clear messages |
 
 ---
 
 ## 🧩 Final Notes
 
-This system is designed with:
-- Clean modular routes and controllers
-- Flexible schema for growth (suppliers, bundles, etc.)
-- Production-level error safety and code practices
+- Fully functional backend for B2B inventory tracking
+- Modular and extensible architecture
+- Ready for integration with frontend or mobile apps
+- Can be containerized and deployed
 
 
