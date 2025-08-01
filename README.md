@@ -138,10 +138,10 @@ The `GET /alerts/companies/:company_id/alerts/low-stock` endpoint:
 
 ## ⚙️ Tech Stack
 
-- **Node.js** — runtime
-- **Express.js** — server framework
-- **MySQL** — relational database
-- **Postman** — API testing tool
+- **Node.js** 
+- **Express.js**
+- **MySQL** 
+- **Postman**
 
 ---
 
@@ -174,13 +174,5 @@ The `GET /alerts/companies/:company_id/alerts/low-stock` endpoint:
 | No input checks                   | Added validation for all fields |
 | No error handling                 | Used `try/catch`, rollback, and clear messages |
 
----
-
-## 🧩 Final Notes
-
-- Fully functional backend for B2B inventory tracking
-- Modular and extensible architecture
-- Ready for integration with frontend or mobile apps
-- Can be containerized and deployed
 
 
