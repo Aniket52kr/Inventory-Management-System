@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
 
-// @route   POST /api/products
-// @desc    Create a new product and initial inventory
-// @access  Public or Protected (depending on future auth)
+// POST /api/products
+// Create a new product and initial inventory
 router.post('/', productController.createProduct);
 
 module.exports = router;

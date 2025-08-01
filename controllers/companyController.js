@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 
+
 exports.createCompany = async (req, res) => {
   const { name } = req.body;
 
@@ -14,11 +15,11 @@ exports.createCompany = async (req, res) => {
     );
 
     res.status(201).json({
-      message: '✅ Company created successfully',
+      message: 'Company created successfully',
       company_id: result.insertId
     });
   } catch (error) {
-    console.error('❌ Error creating company:', error.message);
+    console.error('Error creating company:', error.message);
     res.status(500).json({ error: 'Internal server error while creating company' });
   }
 };

@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+ 
 
 exports.createProduct = async (req, res) => {
   let { name, sku, price, warehouse_id, initial_quantity, threshold = 0 } = req.body;
@@ -62,11 +63,11 @@ exports.createProduct = async (req, res) => {
 
     await connection.commit();
 
-    res.status(201).json({ message: '✅ Product created successfully', product_id: productId });
+    res.status(201).json({ message: 'Product created successfully', product_id: productId });
 
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error('❌ Error creating product:', error.message);
+    console.error('Error creating product:', error.message);
     res.status(500).json({ error: 'Internal server error while creating product' });
 
   } finally {

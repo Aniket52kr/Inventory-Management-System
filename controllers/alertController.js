@@ -1,5 +1,7 @@
 const pool = require('../config/db');
 
+
+
 exports.getLowStockAlerts = async (req, res) => {
   const { company_id } = req.params;
 
@@ -41,6 +43,7 @@ exports.getLowStockAlerts = async (req, res) => {
       [company_id]
     );
 
+
     // Filter out products with no recent sales
     const filteredAlerts = alerts
       .filter(row => row.daily_sales && row.daily_sales > 0)
@@ -72,7 +75,7 @@ exports.getLowStockAlerts = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error fetching low stock alerts:', error.message);
+    console.error('Error fetching low stock alerts:', error.message);
     res.status(500).json({ error: 'Internal server error while fetching low stock alerts' });
   }
 };

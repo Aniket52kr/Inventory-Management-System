@@ -1,5 +1,7 @@
 const pool = require('../config/db');
 
+
+
 exports.recordSale = async (req, res) => {
   const { product_id, warehouse_id, quantity } = req.body;
 
@@ -13,19 +15,19 @@ exports.recordSale = async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // 1. Insert into sales table
+    // Insert into sales table
     await connection.query(
       'INSERT INTO sales (product_id, warehouse_id, quantity) VALUES (?, ?, ?)',
       [product_id, warehouse_id, quantity]
     );
 
-    // 2. Log into inventory_logs
+    // Log into inventory_logs
     await connection.query(
       'INSERT INTO inventory_logs (product_id, warehouse_id, quantity_change, reason) VALUES (?, ?, ?, ?)',
       [product_id, warehouse_id, -quantity, 'sale']
     );
 
-    // 3. Update inventory
+    // Update inventory
     const [updateResult] = await connection.query(
       'UPDATE inventory SET quantity = quantity - ? WHERE product_id = ? AND warehouse_id = ?',
       [quantity, product_id, warehouse_id]
@@ -38,11 +40,11 @@ exports.recordSale = async (req, res) => {
 
     await connection.commit();
 
-    res.status(201).json({ message: '✅ Sale recorded successfully' });
+    res.status(201).json({ message: 'Sale recorded successfully' });
 
   } catch (err) {
     if (connection) await connection.rollback();
-    console.error('❌ Error recording sale:', err.message);
+    console.error('Error recording sale:', err.message);
     res.status(500).json({ error: 'Internal server error while recording sale' });
   } finally {
     if (connection) connection.release();

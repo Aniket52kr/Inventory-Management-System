@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 
+
 exports.createSupplier = async (req, res) => {
     const { name, contact_email } = req.body;
 
@@ -14,11 +15,11 @@ exports.createSupplier = async (req, res) => {
         );
 
         res.status(201).json({
-            message: '✅ Supplier created successfully',
+            message: 'Supplier created successfully',
             supplier_id: result.insertId
         });
     } catch (err) {
-        console.error('❌ Error creating supplier:', err.message);
+        console.error('Error creating supplier:', err.message);
         res.status(500).json({ error: 'Internal server error while creating supplier' });
     }
 };

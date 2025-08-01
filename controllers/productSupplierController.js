@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 
+
 exports.linkProductToSupplier = async (req, res) => {
   const { product_id, supplier_id } = req.body;
 
@@ -25,12 +26,12 @@ exports.linkProductToSupplier = async (req, res) => {
     );
 
     res.status(201).json({
-      message: '✅ Product linked to supplier successfully',
+      message: 'Product linked to supplier successfully',
       link_id: result.insertId
     });
 
   } catch (err) {
-    console.error('❌ Error linking product to supplier:', err.message);
+    console.error('Error linking product to supplier:', err.message);
     res.status(500).json({ error: 'Internal server error while linking product to supplier' });
   }
 };

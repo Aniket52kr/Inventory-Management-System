@@ -8,6 +8,7 @@ const db = require('./config/db');
 // Middleware
 app.use(express.json());
 
+
 // Route files
 const productRoutes = require('./routes/productRoutes');
 const alertRoutes = require('./routes/alertRoutes');
@@ -18,11 +19,9 @@ const productSupplierRoutes = require('./routes/productSupplierRoutes');
 const salesRoutes = require('./routes/salesRoutes');
 
 
-
-
 // Health check route
 app.get('/', (req, res) => {
-  res.send('✅ Bynry Inventory Backend API is running');
+  res.send('Bynry Inventory Backend API is running');
 });
 
 // API Routes
@@ -35,7 +34,6 @@ app.use('/api/product-suppliers', productSupplierRoutes);
 app.use('/api/sales', salesRoutes);
 
 
-
 // Global error handler (optional but recommended)
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
@@ -45,5 +43,5 @@ app.use((err, req, res, next) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });

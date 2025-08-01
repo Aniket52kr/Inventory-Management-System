@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 
+
 exports.createWarehouse = async (req, res) => {
     const { company_id, name, location } = req.body;
 
@@ -14,11 +15,11 @@ exports.createWarehouse = async (req, res) => {
         );
 
         res.status(201).json({
-            message: '✅ Warehouse created successfully',
+            message: 'Warehouse created successfully',
             warehouse_id: result.insertId
         });
     } catch (error) {
-        console.error('❌ Error creating warehouse:', error.message);
+        console.error('Error creating warehouse:', error.message);
         res.status(500).json({ error: 'Internal server error while creating warehouse' });
     }
 };
